@@ -1,0 +1,38 @@
+library(ggplot2)
+sigmoid = function(x) {
+  1 / (1 + exp(-x))
+}
+
+sigmoid2 = function(x) {
+  1 / (1 + exp(-(x-1.3)))
+}
+
+sigmoid3 = function(x) {
+  1 / (1 + exp(-(x+1.3)))
+}
+x <- seq(-5, 5, 0.01)
+# plot(x, sigmoid(x), col='blue')
+
+df <- data.frame (first_column  = x,
+                  second_column = sigmoid(x),
+                  third_column = sigmoid2(x),
+                  fourth_column = sigmoid3(x))
+ggplot(data = df) + geom_point(aes(x = first_column, y = second_column), color = "blue") +
+  geom_point(aes(x = first_column, y = third_column), color = "green")+ 
+  geom_point(aes(x = first_column, y = fourth_column), color = "yellow")+
+  geom_vline(xintercept = c(-1.09, 0.01, 1.1), color = "red") +
+  labs(x = "Time", y = "Recovery index") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+
+
+# Find time points for vertical lines at 25, 50, and 75 % recovery
+min(which(df$second_column>0.25)) # 392
+df$first_column[392] # -1.09
+
+min(which(df$second_column>0.5)) # 502
+df$first_column[502] # 0.1
+
+min(which(df$second_column>0.75)) # 611
+df$first_column[611] # 1.1
