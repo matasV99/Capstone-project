@@ -1,0 +1,12 @@
+library(dabestr)
+my_data <- data.frame (Recovered  = c(0.0769, 0.12, 0.0645, 0, 0.0417, 0),
+                  Condition = c("25 C", "25 C", "25 C", "Room", "Room", "Room")
+)
+
+ unpaired_mean_diff <- dabest(my_data, Condition, Recovered,
+                              idx = c("Room",  "25 C"),
+                              paired = FALSE) %>%
+   mean_diff()
+ unpaired_mean_diff
+
+ plot(unpaired_mean_diff)
