@@ -1,0 +1,88 @@
+# https://docs.google.com/spreadsheets/d/1Bpze4Ly3R3O32DgL7O23LjshhvhXpFk6_6LmsPOcRPU/edit?usp=sharing
+# Open the Excel file containing your data: select and copy the data (ctrl + c)
+my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
+
+
+
+#############
+############# Get slopes
+condition1 = "Nic"
+condition2 = "Suc"
+
+
+my_data_nic <- my_data[my_data$Condition == condition1,]
+my_data_suc <- my_data[my_data$Condition == condition2,]
+
+ten_minute_nic <- my_data$Recovered[my_data$Condition == condition1 & my_data$Time == 10]
+ten_minute_suc <- my_data$Recovered[my_data$Condition == condition2 & my_data$Time == 10]
+
+fifteen_minute_nic <- my_data$Recovered[my_data$Condition == condition1 & my_data$Time == 15]
+fifteen_minute_suc <- my_data$Recovered[my_data$Condition == condition2 & my_data$Time == 15]
+
+twenty_minute_nic <- my_data$Recovered[my_data$Condition == condition1 & my_data$Time == 20]
+twenty_minute_suc <- my_data$Recovered[my_data$Condition == condition2 & my_data$Time == 20]
+
+# Do Nicotine/Caffeine/Drug
+slopes_nic <- c()
+for (i in 1:length(ten_minute_nic)){
+  df <- data.frame (Recovered  = c(ten_minute_nic[i], fifteen_minute_nic[i], twenty_minute_nic[i]),
+                    Time = c(10, 15, 20)
+  )
+  
+  lmRepeat1 = lm(Recovered ~  0 + Time, data = df)
+  # add the value for later power analysis
+  slopes_nic <- append(lmRepeat1$coefficients, slopes_nic)
+}
+
+# Do Sucrose
+slopes_suc <- c()
+# this is sensitive to the number of repeats you have. If you have a mistake and there are some missing,
+# this might be a problem if you have repeats missing in some places
+for (i in 1:length(ten_minute_suc)){
+  df <- data.frame (Recovered  = c(ten_minute_suc[i], fifteen_minute_suc[i], twenty_minute_suc[i]),
+                    Time = c(10, 15, 20)
+  )
+  
+  lmRepeat1 = lm(Recovered ~ 0 + Time, data = df)
+  # add the value for later power analysis
+  slopes_suc <- append(lmRepeat1$coefficients, slopes_suc)
+}
+
+#############
+############# Analysis of slopes
+
+# t-test
+t.test(slopes_nic, slopes_suc) # Nicotine - p-value 0.01718; Caffeine - p-value = 7.881e-07
+
+# Do one sample t.test of ratios of slopes
+# Possible error here - division by 0 makes the ratio infinite; need to have vectors slopes_nic and slopes_suc same length
+
+t.test(slopes_nic/slopes_suc, mu = 1) # p-value = 0.02571 # 0.02177
+
+# Power analysis
+d <- cohen.d(slopes_nic, slopes_suc)
+
+df <- data.frame(matrix(NA, nrow = 20, ncol = 2))
+# sample size cant be 1, so start from 2
+df[1,1] <- 1
+df[1,2] <- 0
+colnames(df)[1] <- "n_sample_size"
+colnames(df)[2] <- "power"
+# df
+for (ii in 2:20){
+  p1<- pwr.t.test(n=ii,d=d$estimate,sig.level=0.05,type="two.sample")
+  df[ii,1] <- p1[1]
+  df[ii,2] <- p1[4]
+}
+
+df
+# power of 0.9 used as a cutoff
+a <- ggplot(df, aes(x=n_sample_size, y=power)) +geom_line() + 
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  geom_hline(yintercept=0.9, linetype="dashed", color = "red")+
+  ggtitle("Nicotine recovery Assay Power Analysis") +
+  xlab("Sample size (n)") +
+  ylab("Power (p)") +
+  theme_bw()
+print(a)
