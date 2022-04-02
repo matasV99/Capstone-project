@@ -1,5 +1,5 @@
 # Capstone-project
-Repository containing the code involved in the Capstone project by Matas Vitkauskas titled "Cosmetic neurology at scale: developing a scalable high-throughput assay for novel nootropic discovery".
+This repository contains code used in the Capstone project by Matas Vitkauskas titled "Cosmetic neurology at scale: developing a scalable high-throughput assay for novel nootropic discovery".
 
 Estimation plots used in this project use the "dabest" package from the following publication: 
 
