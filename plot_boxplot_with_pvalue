@@ -1,14 +1,15 @@
 library(ggplot2)
 library(ggpubr)
 
-# https://docs.google.com/spreadsheets/d/1Ke-LGbzX7D7Tr7kwvdKB1BkQZtUztJT0yycRYTRUNgU/edit?usp=sharing
+# https://docs.google.com/spreadsheets/d/10sE4Ft6sfSsBHZ67QVArS3W3bM-25XYZkEVjk_S-CdI/edit#gid=0 to the right
 my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
 
-my_data
-my_comparisons = list(c("Cap", "Regular"))
-ggboxplot(my_data, x = "Condition", y = "Recovered", color = "Condition") +
-  stat_compare_means(comparisons = my_comparisons, label.y = c(0.7, 0.75, 0.8)) +
+
+# https://stackoverflow.com/questions/17084566/put-stars-on-ggplot-barplots-and-boxplots-to-indicate-the-level-of-significanc
+
+my_comparisons = list( c("Caf", "Suc"), c("Suc", "Nic"), c("Caf", "Nic") )
+ggboxplot(my_data, x = "Condition", y = "Recovered", color = "Condition") + 
+  stat_compare_means(comparisons = my_comparisons, label.y = c(0.65, 0.55, 0.7)) + 
   theme(legend.position = "none") +
-  ylab(label = "Nicotine recovery index") +
-  scale_x_discrete(labels = c("Capillary method", "Regular method")) +
-  xlab(label = "Condition (Caipllary n = 10; Regular n = 6)")
+  scale_x_discrete(labels = c("Caffeine 1.1 mM n=9", "Sucrose n=17", "Nicotine 4mM n=7")) +
+  ylab(label = "Recovery index")
