@@ -2,6 +2,7 @@ library(ggplot2)
 library(scales)
 
 # https://docs.google.com/spreadsheets/d/1D2qoPJS2D4l0YotTsV1HLJxbTTjD0m6hTfBJ8s8Pnlk/edit#gid=0
+# Open the Excel file containing your data: select and copy the data (ctrl + c)
 my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
 
 p <- ggplot(my_data, aes(x=Time, y=Averages, color = Condition)) +
