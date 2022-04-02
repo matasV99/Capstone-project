@@ -2,6 +2,7 @@ library(ggplot2)
 library(ggpubr)
 
 # https://docs.google.com/spreadsheets/d/10sE4Ft6sfSsBHZ67QVArS3W3bM-25XYZkEVjk_S-CdI/edit#gid=0 to the right
+# Open the Excel file containing your data: select and copy the data (ctrl + c)
 my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
 
 
