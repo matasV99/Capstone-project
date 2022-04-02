@@ -1,0 +1,14 @@
+library(ggplot2)
+library(ggpubr)
+
+# https://docs.google.com/spreadsheets/d/1Ke-LGbzX7D7Tr7kwvdKB1BkQZtUztJT0yycRYTRUNgU/edit?usp=sharing
+my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
+
+my_data
+my_comparisons = list(c("Cap", "Regular"))
+ggboxplot(my_data, x = "Condition", y = "Recovered", color = "Condition") +
+  stat_compare_means(comparisons = my_comparisons, label.y = c(0.7, 0.75, 0.8)) +
+  theme(legend.position = "none") +
+  ylab(label = "Nicotine recovery index") +
+  scale_x_discrete(labels = c("Capillary method", "Regular method")) +
+  xlab(label = "Condition (Caipllary n = 10; Regular n = 6)")
