@@ -1,0 +1,365 @@
+library(ggplot2)
+library("dplyr")                                          
+# https://docs.google.com/spreadsheets/d/145IvxfWUtQEMkgLeurWUnNwzxcilysjKBVotx0rgqEo/edit#gid=0
+
+my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
+
+
+
+# ----------------------------------------------------------------#
+### Data-preprocessing
+##################################
+################################## Add 0s because ssLogis needs more points
+
+test <- my_data[1:5,]
+test$Recovered <- 0
+test$Time <- 0
+
+# Repeat 1 - n = 11 for sucrose and nicotine
+# Repeat 2 - n = 10 for sucrose and nicotine
+# Repeat 3 - n = 3 for sucrose and nicotine
+
+# 24 Nic, 24 Cafeine
+
+# 3 : 2 * 8 = 24 : 16
+# just add 8 more
+
+test_new <- test %>% slice(rep(1:n(), each = 8)) 
+test2 <- my_data[1:8,]
+test2[1:8,]$Condition <- "Suc"
+test2$Recovered <- 0
+test2$Time <- 0
+test2[5:8,]$Repeat <- 1
+test2[1:5,]$Repeat <- 2
+
+# Convert Repeats for Nicotine 
+test_new[20:24,]$Repeat <- 2
+test_new[33:37,]$Repeat <- 2
+test_new[38:40,]$Repeat <- 3
+
+# Convert Repeats for Sucrose
+test_new[28:32,]$Repeat <- 2
+test_new[25:29,]$Repeat <- 2
+test_new[30:32,]$Repeat <- 3
+
+test_new <- rbind(test_new, test2)
+
+# nrow(test_new[test_new$Condition == "Suc" & test_new$Repeat== 1,])
+
+my_data_with0 <- rbind(my_data, test_new)
+
+
+
+
+
+# ----------------------------------------------------------------#
+### Fitting experiments
+##################################
+################################## Run analysis for linear
+
+# Repeat 1
+my_data_repeat_1 <- my_data[my_data$Repeat== 1,]
+
+my_data_repeat_1_nic <- my_data_repeat_1[my_data_repeat_1$Condition == "Nic",]
+my_data_repeat_1_suc <- my_data_repeat_1[my_data_repeat_1$Condition == "Suc",]
+
+lmRepeat1_nic = lm(Recovered ~ 0 + Time, data = my_data_repeat_1_nic)
+summary(lmRepeat1_nic) # y=0.026431x
+
+R1_nic <- lmRepeat1_nic$coefficients # gives linear coefficient
+
+lmRepeat1_suc = lm(Recovered ~ 0 + Time, data = my_data_repeat_1_suc)
+summary(lmRepeat1_suc)
+
+R1_suc <- lmRepeat1_suc$coefficients # gives linear coefficient
+
+# plot
+x = predict(lmRepeat1_nic, newdata = data.frame(Time = seq(length.out = 20)))
+
+ggplot(my_data_repeat_1_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 20)), aes(x = timetaken, y = x)) 
+
+x = predict(lmRepeat1_suc, newdata = data.frame(Time = seq(length.out = 20)))
+
+ggplot(my_data_repeat_1_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 20)), aes(x = timetaken, y = x)) 
+
+
+# Repeat 2
+my_data_repeat_2 <- my_data[my_data$Repeat== 2,]
+
+my_data_repeat_2_nic <- my_data_repeat_2[my_data_repeat_2$Condition == "Nic",]
+my_data_repeat_2_suc <- my_data_repeat_2[my_data_repeat_2$Condition == "Suc",]
+
+lmRepeat2_nic = lm(Recovered ~ 0 + Time, data = my_data_repeat_2_nic)
+R2_nic <- lmRepeat2_nic$coefficients # gives linear coefficient
+
+lmRepeat2_suc = lm(Recovered ~ 0 + Time, data = my_data_repeat_2_suc)
+R2_suc <- lmRepeat2_suc$coefficients # gives linear coefficient
+
+summary(lmRepeat2_nic) 
+summary(lmRepeat2_suc)
+
+# plot
+x = predict(lmRepeat2_nic, newdata = data.frame(Time = seq(length.out = 20)))
+
+ggplot(my_data_repeat_2_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 20)), aes(x = timetaken, y = x)) 
+
+x = predict(lmRepeat2_suc, newdata = data.frame(Time = seq(length.out = 20)))
+
+ggplot(my_data_repeat_2_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 20)), aes(x = timetaken, y = x)) 
+
+
+# Repeat 3
+my_data_repeat_3 <- my_data[my_data$Repeat== 3,]
+
+my_data_repeat_3_nic <- my_data_repeat_3[my_data_repeat_3$Condition == "Nic",]
+my_data_repeat_3_suc <- my_data_repeat_3[my_data_repeat_3$Condition == "Suc",]
+
+lmRepeat3_nic = lm(Recovered ~ 0 + Time, data = my_data_repeat_3_nic)
+R3_nic <- lmRepeat3_nic$coefficients # gives linear coefficient
+lmRepeat3_suc = lm(Recovered ~ 0 + Time, data = my_data_repeat_3_suc)
+R3_suc <- lmRepeat3_suc$coefficients # gives linear coefficient
+
+summary(lmRepeat3_nic) 
+summary(lmRepeat3_suc)
+
+# plot
+x = predict(lmRepeat3_nic, newdata = data.frame(Time = seq(length.out = 30)))
+
+ggplot(my_data_repeat_3_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 30)), aes(x = timetaken, y = x)) 
+
+x = predict(lmRepeat3_suc, newdata = data.frame(Time = seq(length.out = 30)))
+
+ggplot(my_data_repeat_3_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 30)), aes(x = timetaken, y = x)) 
+
+##################################
+################################## Run analysis for linear where y-intercept != 0
+# Repeat 1
+my_data_repeat_1 <- my_data[my_data$Repeat== 1,]
+
+my_data_repeat_1_nic <- my_data_repeat_1[my_data_repeat_1$Condition == "Nic",]
+my_data_repeat_1_suc <- my_data_repeat_1[my_data_repeat_1$Condition == "Suc",]
+
+lmRepeat1_nic = lm(Recovered ~   Time, data = my_data_repeat_1_nic)
+summary(lmRepeat1_nic) # y=0.026431x
+
+R1_nic_0  <- lmRepeat1_nic$coefficients # gives linear coefficient
+
+lmRepeat1_suc = lm(Recovered ~   Time, data = my_data_repeat_1_suc)
+summary(lmRepeat1_suc)
+
+R1_suc_0 <- lmRepeat1_suc$coefficients # gives linear coefficient
+
+# plot
+x = predict(lmRepeat1_nic, newdata = data.frame(Time = seq(length.out = 20)))
+
+ggplot(my_data_repeat_1_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 20)), aes(x = timetaken, y = x)) 
+
+x = predict(lmRepeat1_suc, newdata = data.frame(Time = seq(length.out = 20)))
+
+ggplot(my_data_repeat_1_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 20)), aes(x = timetaken, y = x)) 
+
+
+# Repeat 2
+my_data_repeat_2 <- my_data[my_data$Repeat== 2,]
+
+my_data_repeat_2_nic <- my_data_repeat_2[my_data_repeat_2$Condition == "Nic",]
+my_data_repeat_2_suc <- my_data_repeat_2[my_data_repeat_2$Condition == "Suc",]
+
+lmRepeat2_nic = lm(Recovered ~   Time, data = my_data_repeat_2_nic)
+R2_nic_0 <- lmRepeat2_nic$coefficients # gives linear coefficient
+
+lmRepeat2_suc = lm(Recovered ~   Time, data = my_data_repeat_2_suc)
+R2_suc_0 <- lmRepeat2_suc$coefficients # gives linear coefficient
+
+summary(lmRepeat2_nic) 
+summary(lmRepeat2_suc)
+
+# plot
+x = predict(lmRepeat2_nic, newdata = data.frame(Time = seq(length.out = 20)))
+
+ggplot(my_data_repeat_2_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 20)), aes(x = timetaken, y = x)) 
+
+x = predict(lmRepeat2_suc, newdata = data.frame(Time = seq(length.out = 20)))
+
+ggplot(my_data_repeat_2_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 20)), aes(x = timetaken, y = x)) 
+
+
+# Repeat 3
+my_data_repeat_3 <- my_data[my_data$Repeat== 3,]
+
+my_data_repeat_3_nic <- my_data_repeat_3[my_data_repeat_3$Condition == "Nic",]
+my_data_repeat_3_suc <- my_data_repeat_3[my_data_repeat_3$Condition == "Suc",]
+
+lmRepeat3_nic = lm(Recovered ~   Time, data = my_data_repeat_3_nic)
+R3_nic_0 <- lmRepeat3_nic$coefficients # gives linear coefficient
+lmRepeat3_suc = lm(Recovered ~   Time, data = my_data_repeat_3_suc)
+R3_suc_0 <- lmRepeat3_suc$coefficients # gives linear coefficient
+
+summary(lmRepeat3_nic) 
+summary(lmRepeat3_suc)
+
+# plot
+x = predict(lmRepeat3_nic, newdata = data.frame(Time = seq(length.out = 30)))
+
+ggplot(my_data_repeat_3_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 30)), aes(x = timetaken, y = x)) 
+
+x = predict(lmRepeat3_suc, newdata = data.frame(Time = seq(length.out = 30)))
+
+ggplot(my_data_repeat_3_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(data = data.frame(x, timetaken = seq(1, 30)), aes(x = timetaken, y = x)) 
+
+
+##################################
+################################## Run analysis for Sigmoidal
+
+### Repeat 1
+my_data_with0_repeat_1 <- my_data_with0[my_data_with0$Repeat== 1,]
+
+my_data_with0_repeat_1_nic <- my_data_with0_repeat_1[my_data_with0_repeat_1$Condition == "Nic",]
+my_data_with0_repeat_1_suc <- my_data_with0_repeat_1[my_data_with0_repeat_1$Condition == "Suc",]
+
+###- Nic
+R1_nic_Sig <- nls(Recovered ~ SSlogis(Time, Asym, xmid, scal), data = my_data_with0_repeat_1_nic)
+summary(R1_nic_Sig) # Asym/(1+exp((xmid-input)/scal))
+# 0.8264/(1+exp((15.0988-x)/5.2152))
+x = predict(R1_nic_Sig, newdata = data.frame(x = seq(0.01, 0.02, length.out = 1)))
+my_data_with0_repeat_1_nic$Predict <- x[1:44]
+
+ggplot(my_data_with0_repeat_1_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(aes(x = Time, y = Predict)) 
+
+#-----Suc
+
+R1_suc_Sig <- nls(Recovered ~ SSlogis(Time, Asym, xmid, scal), data = my_data_with0_repeat_1_suc)
+summary(R1_suc_Sig) # Asym/(1+exp((xmid-input)/scal))
+# 0.8264/(1+exp((15.0988-x)/5.2152))
+x = predict(R1_suc_Sig, newdata = data.frame(x = seq(0.01, 0.02, length.out = 1)))
+my_data_with0_repeat_1_suc$Predict <- x[1:44]
+
+ggplot(my_data_with0_repeat_1_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(aes(x = Time, y = Predict)) 
+
+### Repeat 2
+my_data_with0_repeat_2 <- my_data_with0[my_data_with0$Repeat== 2,]
+
+my_data_with0_repeat_2_nic <- my_data_with0_repeat_2[my_data_with0_repeat_2$Condition == "Nic",]
+my_data_with0_repeat_2_suc <- my_data_with0_repeat_2[my_data_with0_repeat_2$Condition == "Suc",]
+
+###- Nic
+R2_nic_Sig <- nls(Recovered ~ SSlogis(Time, Asym, xmid, scal), data = my_data_with0_repeat_2_nic)
+summary(R2_nic_Sig) # Asym/(1+exp((xmid-input)/scal))
+# 0.8264/(1+exp((15.0988-x)/5.2152))
+x = predict(R2_nic_Sig, newdata = data.frame(x = seq(0.01, 0.02, length.out = 1)))
+my_data_with0_repeat_2_nic$Predict <- x[1:40]
+
+ggplot(my_data_with0_repeat_2_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(aes(x = Time, y = Predict)) 
+
+#-----Suc
+
+R2_suc_Sig <- nls(Recovered ~ SSlogis(Time, Asym, xmid, scal), data = my_data_with0_repeat_2_suc)
+summary(R2_suc_Sig) # Asym/(1+exp((xmid-input)/scal))
+# 0.8264/(1+exp((15.0988-x)/5.2152))
+x = predict(R2_suc_Sig, newdata = data.frame(x = seq(0.01, 0.02, length.out = 1)))
+my_data_with0_repeat_2_suc$Predict <- x[1:40]
+
+ggplot(my_data_with0_repeat_2_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(aes(x = Time, y = Predict)) 
+
+### Repeat 3
+my_data_with0_repeat_3 <- my_data_with0[my_data_with0$Repeat== 3,]
+
+my_data_with0_repeat_3_nic <- my_data_with0_repeat_3[my_data_with0_repeat_3$Condition == "Nic",]
+my_data_with0_repeat_3_suc <- my_data_with0_repeat_3[my_data_with0_repeat_3$Condition == "Suc",]
+
+###- Nic
+R3_nic_Sig <- nls(Recovered ~ SSlogis(Time, Asym, xmid, scal), data = my_data_with0_repeat_3_nic)
+summary(R3_nic_Sig) # Asym/(1+exp((xmid-input)/scal))
+# 0.8264/(1+exp((15.0988-x)/5.3153))
+x = predict(R3_nic_Sig, newdata = data.frame(x = seq(0.01, 0.02, length.out = 1)))
+my_data_with0_repeat_3_nic$Predict <- x[1:20]
+
+ggplot(my_data_with0_repeat_3_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(aes(x = Time, y = Predict)) 
+
+#-----Suc
+
+R3_suc_Sig <- nls(Recovered ~ SSlogis(Time, Asym, xmid, scal), data = my_data_with0_repeat_3_suc)
+summary(R3_suc_Sig) # Asym/(1+exp((xmid-input)/scal))
+# 0.8264/(1+exp((15.0988-x)/5.3153))
+x = predict(R3_suc_Sig, newdata = data.frame(x = seq(0.01, 0.02, length.out = 1)))
+my_data_with0_repeat_3_suc$Predict <- x[1:21]
+
+ggplot(my_data_with0_repeat_3_suc, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(aes(x = Time, y = Predict)) 
+
+# # No yintercept in origin
+# lmRepeat1_nic = lm(Recovered ~ Time, data = my_data_repeat_1_nic)
+# summary(lmRepeat1_nic) # y= 0.035727x + -0.149779
+
+R3_nic_Sig <- nls(Recovered ~ SSlogis(Time, Asym, xmid, scal), data = my_data_repeat_3_nic)
+summary(R3_nic_Sig) # Asym/(1+exp((xmid-input)/scal))
+# 0.8264/(1+exp((15.0988-x)/5.3153))
+x = predict(R3_nic_Sig, newdata = data.frame(x = seq(0.01, 0.02, length.out = 1)))
+my_data_repeat_3_nic$Predict <- x[1:17]
+
+ggplot(my_data_repeat_3_nic, aes(x=Time, y=Recovered)) +
+  geom_point() +
+  geom_line(aes(x = Time, y = Predict)) 
+
+
+
+
+
+# ----------------------------------------------------------------#
+### Comparison between fittings
+##################################
+##################################checking coefficient of variations
+# check for coefficient of variation for linear
+sd(c(R1_nic/R1_suc, R2_nic/R2_suc, R3_nic/R3_suc)) / mean(c(R1_nic/R1_suc, R2_nic/R2_suc, R3_nic/R3_suc))
+# 0.2866564
+
+# for checking coefficient of variation for linear y-intercept != 0 
+sd(c(R1_nic_0[2] /R1_suc_0[2], R2_nic_0[2]/R2_suc_0[2], R3_nic_0[2]/R3_suc_0[2])) / mean(c(R1_nic_0[2] /R1_suc_0[2], R2_nic_0[2]/R2_suc_0[2], R3_nic_0[2]/R3_suc_0[2]))
+
+
+# check for coefficient of variation for sigmoidal using hill slope # manually find the Scal value from summary function for sigmoidal function
+N1 = 2.2897 
+S1 = 4.236
+N2 = 2.4355
+S2 = 2.8438
+N3 = 4.8876
+S3 = 3.6850
+sd(c(N1/S1, N2/S2,N3/S3))/ mean(c(N1/S1, N2/S2,N3/S3))
+
+
+c(N1/S1, N2/S2,N3/S3) # 0.5405335 0.8564245 1.3263501
