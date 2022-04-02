@@ -1,0 +1,90 @@
+library(ggplot2)
+library(dabestr)
+library(effsize)
+
+# change the comparison conditions
+condition1 = "Caf"
+condition2 = "Suc"
+
+# 10 mM Caffeine vs Sucrose: https://docs.google.com/spreadsheets/d/1Pd4ZSKQNNpDqFdVbBd_iLLWB-O-SbWxU0iaotwLLyXE/edit?usp=sharing
+# Open the Excel file containing your data: select and copy the data (ctrl + c)
+my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
+
+# averages and standard deviation for each time point
+a10_n <- mean(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition1])
+sd10_n <- sd(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition1])
+a15_n <- mean(my_data$Recovered[my_data$Time == 15 & my_data$Condition == condition1])
+sd15_n <- sd(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition1])
+a20_n <- mean(my_data$Recovered[my_data$Time == 20 & my_data$Condition == condition1])
+sd20_n <- sd(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition1])
+
+a10_s <- mean(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition2])
+sd10_s <- sd(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition2])
+a15_s <- mean(my_data$Recovered[my_data$Time == 15 & my_data$Condition == condition2])
+sd15_s <- sd(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition2])
+a20_s <- mean(my_data$Recovered[my_data$Time == 20 & my_data$Condition == condition2])
+sd20_s <- sd(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition2])
+
+# plot timeseries of averages for each time point
+df_t <- data.frame(matrix(NA, nrow = 6, ncol = 4))
+colnames(df_t) <- c("Time", "Averages", "Condition", "Sd")
+df_t$Time <- c(10, 10, 15, 15, 20, 20)
+df_t$Condition <- c(condition1, condition2, condition1, condition2,condition1, condition2)
+df_t$Averages <- c(a10_n, a10_s, a15_n, a15_s, a20_n, a20_s)
+df_t$Sd <- c(sd10_n, sd10_s, sd15_n, sd15_s, sd20_n, sd20_s)
+
+p <- ggplot(df_t, aes(x=Time, y=Averages, color = Condition)) +
+  geom_line() + 
+  ylab(label = "Recovery index") +
+  xlab(label = "Time (min)")+
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  guides(col=guide_legend("Different experimental conditions")) +
+  geom_errorbar(aes(ymin=Averages-Sd, ymax=Averages+Sd), width=.2,
+                position=position_dodge(.5)) +
+  theme_bw()
+
+p
+
+# two-tailed t.test for each timepoint
+
+# 10 min
+t.test(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition1], my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition2])
+# 15 min
+t.test(my_data$Recovered[my_data$Time == 15 & my_data$Condition == condition1], my_data$Recovered[my_data$Time == 15 & my_data$Condition == condition2])
+# 20 min
+t.test(my_data$Recovered[my_data$Time == 20 & my_data$Condition == condition1], my_data$Recovered[my_data$Time == 20 & my_data$Condition == condition2])
+
+### power calculations for each timepoint
+d10 <- cohen.d(my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition1], my_data$Recovered[my_data$Time == 10 & my_data$Condition == condition2])
+d15 <- cohen.d(my_data$Recovered[my_data$Time == 15 & my_data$Condition == condition1], my_data$Recovered[my_data$Time == 15 & my_data$Condition == condition2])
+d20 <- cohen.d(my_data$Recovered[my_data$Time == 20 & my_data$Condition == condition1], my_data$Recovered[my_data$Time == 20 & my_data$Condition == condition2])
+
+list <- c(d10$estimate, d15$estimate, d20$estimate)
+
+for (i in list){
+  df <- data.frame(matrix(NA, nrow = 20, ncol = 2))
+  # sample size cant be 1, so start from 2
+  df[1,1] <- 1
+  df[1,2] <- 0
+  colnames(df)[1] <- "n_sample_size"
+  colnames(df)[2] <- "power"
+  df
+  for (ii in 2:20){
+    p1<- pwr.t.test(n=ii,d=i,sig.level=0.05,type="two.sample")
+    df[ii,1] <- p1[1]
+    df[ii,2] <- p1[4]
+  }
+  
+  df
+  # 0.9 can be used as a cutoff?!?
+  a <- ggplot(df, aes(x=n_sample_size, y=power)) +geom_line() + 
+    scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+    geom_hline(yintercept=0.9, linetype="dashed", color = "red")+
+    ggtitle("Caffeine recovery Assay Power Analysis") +
+    xlab("Sample size (n)") +
+    ylab("Power (p)") +
+    theme_bw()
+  print(a)
+}
