@@ -1,6 +1,7 @@
 library(ggplot2)
 library("dplyr")                                          
 # https://docs.google.com/spreadsheets/d/145IvxfWUtQEMkgLeurWUnNwzxcilysjKBVotx0rgqEo/edit#gid=0
+# Open the Excel file containing your data: select and copy the data (ctrl + c)
 
 my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
 
