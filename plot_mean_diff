@@ -1,4 +1,6 @@
 library(dabestr)
+library(dplyr)
+
 my_data <- data.frame (Recovered  = c(0.0769, 0.12, 0.0645, 0, 0.0417, 0),
                   Condition = c("25 C", "25 C", "25 C", "Room", "Room", "Room")
 )
