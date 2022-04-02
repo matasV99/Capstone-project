@@ -1,0 +1,15 @@
+# one-way anova
+library(pwr)
+library(effsize)
+library(ggplot2)
+
+# # Open the Excel file containing your data: select and copy the data (ctrl + c)
+# https://docs.google.com/spreadsheets/d/1Pd4ZSKQNNpDqFdVbBd_iLLWB-O-SbWxU0iaotwLLyXE/edit?usp=sharing
+my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
+
+# my_data$Time <- factor(my_data$Time, levels = c(10, 15, 20),
+#                        labels = c("T10", "T15", "T20"))
+my_data$Trial <- factor(my_data$Trial, levels = c(1,2,3,4,5,6),
+                       labels = c("T1", "T2", "T3", "T4", "T5", "T6"))
+res.aov2 <- aov(Recovered ~ Trial + Condition, data = my_data)
+summary(res.aov2)
