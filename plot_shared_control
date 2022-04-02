@@ -1,0 +1,14 @@
+library(dabestr)
+# https://docs.google.com/spreadsheets/d/1efMEJS5cMQMpWzmQIMwpYT5g1Q3c0U_rRstVKY0XjEY/edit#gid=0
+my_data <- read.table(file = "clipboard", sep = "\t", header = TRUE)
+
+ shared.control <-
+   my_data %>%
+   dabest(condition, Phototaxis_index,
+          idx = c("Sucrose", "Nicotine 4 mM", "Caffeine 1.1 mM"),
+          paired = FALSE
+   )
+
+ shared.control.mean_diff <- shared.control %>% mean_diff()
+
+ plot(shared.control.mean_diff)
